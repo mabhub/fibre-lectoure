@@ -47,6 +47,7 @@ const fs = require('fs').promises;
   // Create gziped data and write to file
   const compressedJsonString = await gzip(jsonString);
   await fs.writeFile(filename, compressedJsonString);
+  await fs.writeFile('last.json', jsonString);
 
   // Update db file
   await fs.writeFile('db.json', JSON.stringify(db, null, 2));
