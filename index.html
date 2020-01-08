@@ -98,8 +98,16 @@
           if (!marker) {
             marker = L.circleMarker([latitude, longitude], markerOptions).addTo(map);
             marker.on('click', e => {
+              const data = Object.entries(dataSet.find(({ dossier: d }) => (dossier === d)));
               popup.setContent(`
-                <pre>${JSON.stringify(dataSet.find(({ dossier: d }) => (dossier === d)), null, 2)}<pre>
+              <table>
+                ${data.map(([key, value]) => `
+                  <tr>
+                    <th>${key}</th>
+                    <td>${value}</td>
+                  </tr>
+                `).sort().join`\n`}
+              </table>
               `);
               popup.setLatLng(marker.getLatLng());
               popup.openOn(map);
