@@ -52,7 +52,6 @@
   <script type="module">
     import { html, render } from 'https://unpkg.com/htm/preact/standalone.module.js'
 
-    
     const main = async () => {
       const map = L.map('mapid');
       const popup = L.popup();
@@ -60,7 +59,6 @@
       const markerStore = {};
 
       map.setView([43.9074, 0.6909], 13);
-
       L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
 
       const rawData = await fetch('./db.json');
@@ -68,12 +66,11 @@
 
       const dataSets = [];
       for (const dataSetName of data) {
-        const name = dataSetName.replace('.gzip', '');
-        const rawDataSet = await fetch(`./${name}`);
+        const rawDataSet = await fetch(`./${dataSetName}.json`);
         const dataSet = await rawDataSet.json();
         dataSets.push({
           data: dataSet,
-          name,
+          name: dataSetName,
         });
       }
 

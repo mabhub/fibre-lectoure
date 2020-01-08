@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const fetch = require('node-fetch');
-const { gzip } = require('node-gzip');
 const fs = require('fs').promises;
 
 (async () => {
@@ -41,12 +40,10 @@ const fs = require('fs').promises;
   const time = rawTime.split('.')[0].replace(/:/g, '-');
 
   // Generate and store new filename
-  const filename = `${date}--${time}.json.gzip`;
-  db.push(`${date}--${time}.json.gzip`);
+  const filename = `${date}--${time}.json`;
+  db.push(`${date}--${time}`);
 
-  // Create gziped data and write to file
-  const compressedJsonString = await gzip(jsonString);
-  await fs.writeFile(filename, compressedJsonString);
+  await fs.writeFile(filename, jsonString);
   await fs.writeFile('last.json', jsonString);
 
   // Update db file
