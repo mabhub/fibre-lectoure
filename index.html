@@ -82,7 +82,13 @@
           let marker = markerStore[dossier];
 
           if (!marker) {
-            marker = L.circleMarker([latitude, longitude], { radius: 4 }).addTo(map);
+            marker = L.circleMarker([latitude, longitude], {
+              radius: 4,
+              weight: .5,
+              color: '#000000',
+              opacity: .7,
+              fillOpacity: .8,
+            }).addTo(map);
             marker.on('click', e => {
               popup.setContent(`
                 <pre>${JSON.stringify(dataSet.find(({ dossier: d }) => (dossier === d)), null, 2)}<pre>
@@ -94,22 +100,26 @@
           }
 
           switch (statutFtth) {
-            case 'ECE': // Etude en cours
-              marker.setStyle({ color: '#CF6B6B' });
+            case 'RSD': // 'Raccordable sur demande';
               break;
-            case 'ECE': // Etude en cours
-              marker.setStyle({ color: '#C6A65A' });
+            case 'SUS': // 'Déploiement suspendu';
+              marker.setStyle({ fillColor: '#000000' }); // noir
               break;
-            case 'PDI': // Ouverture commercial
-              marker.setStyle({ color: '#8FBE4A' });
+            case 'DIS': // 'Disponible à la commercialisation';
+              marker.setStyle({ fillColor: '#37872F' });  // vert
               break;
-            case 'DIS': // Disponible
-              marker.setStyle({ color: '#37872F' });
+            case 'PDI': // 'Prochainement disponible';
+              marker.setStyle({ fillColor: '#8FBE4A' }); // vert clair
+              break;
+            case 'ECD': // 'En cours de déploiement';
+              marker.setStyle({ fillColor: '#C6A65A' }); // orange
+              break;
+            case 'ECE': // 'En cours d\'étude'
+              marker.setStyle({ fillColor: '#CF6B6B' }); // route
               break;
             default:
-              marker.setStyle({ color: '#aaaaaa' });
-          };
-
+              marker.setStyle({ fillColor: '#aaaaaa' }); // gris
+          }
         });
       };
 
