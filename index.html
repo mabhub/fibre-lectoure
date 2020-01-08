@@ -59,7 +59,8 @@
       const markerStore = {};
 
       map.setView([43.9074, 0.6909], 13);
-      L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
+      L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png').addTo(map);
+      // L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
 
       const rawData = await fetch('./db.json');
       const data = await rawData.json();
