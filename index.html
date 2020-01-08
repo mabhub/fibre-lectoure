@@ -63,6 +63,14 @@
 
       const markerStore = {};
 
+      const markerOptions = {
+        radius: 4,
+        weight: .5,
+        color: '#000000',
+        opacity: .7,
+        fillOpacity: .8,
+      };
+
       map.setView([43.935, 0.64], 14);
       L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png').addTo(map);
       // L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
@@ -88,13 +96,7 @@
           let marker = markerStore[dossier];
 
           if (!marker) {
-            marker = L.circleMarker([latitude, longitude], {
-              radius: 4,
-              weight: .5,
-              color: '#000000',
-              opacity: .7,
-              fillOpacity: .8,
-            }).addTo(map);
+            marker = L.circleMarker([latitude, longitude], markerOptions).addTo(map);
             marker.on('click', e => {
               popup.setContent(`
                 <pre>${JSON.stringify(dataSet.find(({ dossier: d }) => (dossier === d)), null, 2)}<pre>
