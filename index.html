@@ -66,12 +66,12 @@
       const data = await rawData.json();
 
       const dataSets = [];
-      for (const dataSetName of data) {
-        const rawDataSet = await fetch(`./${dataSetName}.json`);
+      for (const { filename, date } of data) {
+        const rawDataSet = await fetch(`./${filename}`);
         const dataSet = await rawDataSet.json();
         dataSets.push({
           data: dataSet,
-          name: dataSetName,
+          name: date,
         });
       }
 
@@ -102,6 +102,7 @@
 
           switch (statutFtth) {
             case 'RSD': // 'Raccordable sur demande';
+              marker.setStyle({ fillColor: '#0000aa' }); // bleu
               break;
             case 'SUS': // 'Déploiement suspendu';
               marker.setStyle({ fillColor: '#000000' }); // noir
