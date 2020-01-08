@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+  crossorigin=""/>
+   <!-- Make sure you put this AFTER Leaflet's CSS -->
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+  crossorigin=""></script>
+
+  <!-- <script src="https://unpkg.com/preact@10.1.1/dist/preact.umd.js"></script> -->
+  <!-- <script src="https://unpkg.com/t7@0.3.2/t7.js"></script> -->
+  <script src="https://unpkg.com/htm/preact/standalone.mjs" type="module"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      position: relative;
+    }
+    #mapid {
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    #controls {
+      position: absolute;
+      bottom: 1em;
+      left: 1em;
+
+      background: rgba(255, 255, 255, .75);
+      padding: 1em;
+      z-index: 2;
+    }
+
+    ul, li {
+      margin: 0;
+      padding: 0;
+      list-style-position: inside;
+    }
+  </style>
+</head>
+<body>
+  <div id="mapid"></div>
+  <div id="controls"></div>
+
+  <script type="module">
+    import { html, render } from 'https://unpkg.com/htm/preact/standalone.module.js'
+
+    
+    const main = async () => {
+      const map = L.map('mapid');
+      const popup = L.popup();
+
+      const markerStore = {};
+
+      map.setView([43.9074, 0.6909], 13);
+
+      L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
+
+      const rawData = await fetch('./db.json');
+      const data = await rawData.json();
+
+      const dataSets = [];
+      for (const dataSetName of data) {
+        const name = dataSetName.replace('.gzip', '');
+        const rawDataSet = await fetch(`./${name}`);
+        const dataSet = await rawDataSet.json();
+        dataSets.push({
+          data: dataSet,
+          name,
+        });
+      }
+
+      const switchTo = name => () => {
+        const { data: dataSet } = dataSets.find(({ name: setName }) => (name === setName));
+
+        dataSet.forEach(point => {
+          const { latitude, longitude, dossier, statutFtth } = point;
+          let marker = markerStore[dossier];
+
+          if (!marker) {
+            marker = L.circleMarker([latitude, longitude], { radius: 4 }).addTo(map);
+            marker.on('click', e => {
+              popup.setContent(`
+                <pre>${JSON.stringify(dataSet.find(({ dossier: d }) => (dossier === d)), null, 2)}<pre>
+              `);
+              popup.setLatLng(marker.getLatLng());
+              popup.openOn(map);
+            });
+            markerStore[dossier] = marker;
+          }
+
+          switch (statutFtth) {
+            case 'ECE': // Etude en cours
+              marker.setStyle({ color: '#CF6B6B' });
+              break;
+            case 'ECE': // Etude en cours
+              marker.setStyle({ color: '#C6A65A' });
+              break;
+            case 'PDI': // Ouverture commercial
+              marker.setStyle({ color: '#8FBE4A' });
+              break;
+            case 'DIS': // Disponible
+              marker.setStyle({ color: '#37872F' });
+              break;
+            default:
+              marker.setStyle({ color: '#aaaaaa' });
+          };
+
+        });
+      };
+
+      const controlsContainer = document.querySelector('#controls');
+      const controls = html`
+        <ul>
+          ${dataSets.map(({ name }) =>
+            html`<li><button onclick=${switchTo(name)}>${name}</button></li>`
+          )}
+        </ul>
+      `;
+      render(controls, controlsContainer);
+    };
+
+    main();
+  </script>
+
+  <script>
+
+  </script>
+</body>
+</html>
