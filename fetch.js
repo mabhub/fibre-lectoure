@@ -7,10 +7,10 @@ const crypto = require('crypto');
 (async () => {
   const URL = 'https://eligibilite-thd.fr/eligibilite-thd/api/public/sites/rip/coords/GERS/';
   const postBody = {
-    latEast: 43.967189,
-    latWest: 43.907237,
-    lngNorth: 0.709905,
-    lngSouth: 0.544938,
+    latEast: 44.00,
+    latWest: 43.88,
+    lngNorth: 0.74,
+    lngSouth: 0.57,
     statusFtth: ['ECE', 'ECD', 'PDI', 'DIS', 'SUS', 'RSD'],
     statusFtte: [],
     maxSites: 20,

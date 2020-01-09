@@ -71,9 +71,30 @@
         fillOpacity: .8,
       };
 
-      map.setView([43.935, 0.64], 14);
+      const north = 44.00;
+      const south = 43.89;
+      const west = 0.57;
+      const east = 0.73;
+
+      map.fitBounds([
+        [south, west],
+        [north, east],
+      ]);
+
       L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png').addTo(map);
       // L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
+
+      L.polygon([
+        [north, west],
+        [north, east],
+        [south, east],
+        [south, west],
+      ], {
+        interactive: false,
+        color: 'silver',
+        weight: .5,
+        fillOpacity: .005,
+      }).addTo(map);
 
       const lectoureBuffer = await fetch('./lectoure.geojson');
       const lectoure = await lectoureBuffer.json();
@@ -99,6 +120,10 @@
 
       const switchTo = name => () => {
         const { data: dataSet } = dataSets.find(({ name: setName }) => (name === setName));
+
+        for (const dossier in markerStore) {
+          markerStore[dossier].setStyle({ fillColor: '#aaaaaa' })
+        }
 
         dataSet.forEach(point => {
           const { latitude, longitude, dossier, statutFtth } = point;
