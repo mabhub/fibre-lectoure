@@ -75,6 +75,15 @@
       L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png').addTo(map);
       // L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
 
+      const lectoureBuffer = await fetch('./lectoure.geojson');
+      const lectoure = await lectoureBuffer.json();
+      L.geoJSON(lectoure, {
+        interactive: false,
+        color: 'red',
+        weight: .5,
+        fillOpacity: .01,
+      }).addTo(map);
+
       const rawData = await fetch('./db.json');
       const data = await rawData.json();
 
