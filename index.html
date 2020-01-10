@@ -120,6 +120,8 @@
       const data = await rawData.json();
 
       const dataSets = [];
+      let activeDataset;
+
       for (const { filename, date } of data) {
         const rawDataSet = await fetch(`./${filename}`);
         const dataSet = await rawDataSet.json();
@@ -127,6 +129,7 @@
           data: dataSet,
           name: date,
         });
+        activeDataset = date;
       }
 
       const colorFromStatutFtth = value => {
@@ -184,6 +187,7 @@
       };
 
       const switchTo = name => () => {
+        activeDataset = name;
         const { data: dataSet } = dataSets.find(({ name: setName }) => (name === setName));
 
         for (const dossier in markerStore) {
@@ -232,16 +236,18 @@
             )}
           </ul>
           <ul class="buttons">
-            <li><button onclick=${setColorProp('statutFtth')}>by statutFtth</button></li>
-            <li><button onclick=${setColorProp('idPm')}>by idPm</button></li>
-            <li><button onclick=${setColorProp('Voie')}>by Voie</button></li>
-            <li><button onclick=${setColorProp('libelleEtatPm')}>by EtatPm</button></li>
-            <li><button onclick=${setColorProp('nbLogement')}>by nbLogement</button></li>
-            <li><button onclick=${setColorProp('causeBlocage')}>by causeBlocage</button></li>
+            <li><button onclick=${setColorProp('statutFtth')}>statutFtth</button></li>
+            <li><button onclick=${setColorProp('idPm')}>idPm</button></li>
+            <li><button onclick=${setColorProp('voie')}>voie</button></li>
+            <li><button onclick=${setColorProp('libelleEtatPm')}>EtatPm</button></li>
+            <li><button onclick=${setColorProp('nbLogement')}>nbLogement</button></li>
+            <li><button onclick=${setColorProp('causeBlocage')}>causeBlocage</button></li>
           </ul>
         </div>
       `;
       render(controls, controlsContainer);
+
+      switchTo(activeDataset)();
     };
 
     main();
