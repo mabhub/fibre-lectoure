@@ -13,6 +13,8 @@
   integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
   crossorigin=""></script>
 
+  <script src="https://unpkg.com/jshashes"></script>
+
   <style>
     html, body {
       margin: 0;
@@ -43,10 +45,16 @@
 
     .buttons {
       list-style-type: none;
+      margin: .25em 0;
     }
 
     .buttons > li {
       display: inline-block;
+    }
+
+    tr.active {
+      color: green;
+      background-color: #eee;
     }
   </style>
 </head>
@@ -57,11 +65,14 @@
   <script type="module">
     import { html, render } from 'https://unpkg.com/htm/preact/standalone.module.js'
 
+    const md5 = new Hashes.MD5
+
     const main = async () => {
       const map = L.map('mapid');
       const popup = L.popup();
 
       const markerStore = {};
+      let colorProp = 'statutFtth';
 
       const markerOptions = {
         radius: 4,
@@ -118,6 +129,60 @@
         });
       }
 
+      const colorFromStatutFtth = value => {
+        switch (value) {
+          case 'DIS': // 'Disponible à la commercialisation';
+            return '#37872F';  // vert
+
+          case 'PDI': // 'Prochainement disponible';
+            return '#8FBE4A'; // vert clair
+
+          case 'ECD': // 'En cours de déploiement';
+            return '#C6A65A'; // orange
+
+          case 'ECE': // 'En cours d'étude'
+            return '#CF6B6B'; // rouge
+
+          case 'RSD': // 'Raccordable sur demande';
+            return '#0000aa'; // bleu
+
+          case 'SUS': // 'Déploiement suspendu';
+            return '#000000'; // noir
+
+          default:
+            return '#aaaaaa'; // gris
+        }
+      };
+
+      const hashColor = value => `#${md5.hex(value.toString()).substr(0, 6)}`;
+
+      const colorFromProp = prop => marker => {
+        const value = marker.data[prop];
+
+        if (!value) {
+          return '#aaaaaa';
+        }
+
+        if (prop === 'statutFtth') {
+          return colorFromStatutFtth(value);
+        }
+
+        return hashColor(value);
+      };
+
+      const colorBy = prop => {
+        Object.values(markerStore).forEach(marker => {
+          marker.setStyle({
+            fillColor: colorFromProp(prop)(marker),
+          });
+        });
+      };
+
+      const setColorProp = prop => () => {
+        colorProp = prop;
+        colorBy(colorProp);
+      };
+
       const switchTo = name => () => {
         const { data: dataSet } = dataSets.find(({ name: setName }) => (name === setName));
 
@@ -134,14 +199,17 @@
             marker.on('click', e => {
               const data = Object.entries(dataSet.find(({ dossier: d }) => (dossier === d)));
               popup.setContent(`
-              <table>
-                ${data.map(([key, value]) => `
-                  <tr>
-                    <th>${key}</th>
-                    <td>${value}</td>
-                  </tr>
-                `).sort().join`\n`}
-              </table>
+                <table>
+                  ${data.map(([key, value]) => `
+                    <tr
+                      data-key=${key}
+                      class=${colorProp === key ? 'active' : ''}
+                    >
+                      <th>${key}</th>
+                      <td>${value}</td>
+                    </tr>
+                  `).sort().join`\n`}
+                </table>
               `);
               popup.setLatLng(marker.getLatLng());
               popup.openOn(map);
@@ -149,38 +217,29 @@
             markerStore[dossier] = marker;
           }
 
-          switch (statutFtth) {
-            case 'RSD': // 'Raccordable sur demande';
-              marker.setStyle({ fillColor: '#0000aa' }); // bleu
-              break;
-            case 'SUS': // 'Déploiement suspendu';
-              marker.setStyle({ fillColor: '#000000' }); // noir
-              break;
-            case 'DIS': // 'Disponible à la commercialisation';
-              marker.setStyle({ fillColor: '#37872F' });  // vert
-              break;
-            case 'PDI': // 'Prochainement disponible';
-              marker.setStyle({ fillColor: '#8FBE4A' }); // vert clair
-              break;
-            case 'ECD': // 'En cours de déploiement';
-              marker.setStyle({ fillColor: '#C6A65A' }); // orange
-              break;
-            case 'ECE': // 'En cours d\'étude'
-              marker.setStyle({ fillColor: '#CF6B6B' }); // route
-              break;
-            default:
-              marker.setStyle({ fillColor: '#aaaaaa' }); // gris
-          }
+          marker.data = point;
         });
+
+        colorBy(colorProp);
       };
 
       const controlsContainer = document.querySelector('#controls');
       const controls = html`
-        <ul class="buttons">
-          ${dataSets.map(({ name }) =>
+        <div>
+          <ul class="buttons">
+            ${dataSets.map(({ name }) =>
             html`<li><button onclick=${switchTo(name)}>${name}</button></li>`
-          )}
-        </ul>
+            )}
+          </ul>
+          <ul class="buttons">
+            <li><button onclick=${setColorProp('statutFtth')}>by statutFtth</button></li>
+            <li><button onclick=${setColorProp('idPm')}>by idPm</button></li>
+            <li><button onclick=${setColorProp('Voie')}>by Voie</button></li>
+            <li><button onclick=${setColorProp('libelleEtatPm')}>by EtatPm</button></li>
+            <li><button onclick=${setColorProp('nbLogement')}>by nbLogement</button></li>
+            <li><button onclick=${setColorProp('causeBlocage')}>by causeBlocage</button></li>
+          </ul>
+        </div>
       `;
       render(controls, controlsContainer);
     };
