@@ -174,6 +174,8 @@
       };
 
       const colorBy = prop => {
+        map.closePopup();
+
         Object.values(markerStore).forEach(marker => {
           marker.setStyle({
             fillColor: colorFromProp(prop)(marker),
