@@ -32,6 +32,8 @@
       bottom: 1em;
       left: 1em;
 
+      display: flex;
+
       background: rgba(255, 255, 255, .75);
       padding: 1em;
       z-index: 2;
@@ -86,7 +88,10 @@
 </head>
 <body>
   <div id="mapid"></div>
-  <div id="controls"></div>
+  <div id="controls">
+    <div id="range"></div>
+    <div id="display"></div>
+  </div>
 
   <script type="module">
     import { html, render } from 'https://unpkg.com/htm/preact/standalone.module.js'
@@ -147,6 +152,9 @@
 
       const dbSource = await fetch('./db.json');
       const dbItems = await dbSource.json();
+
+      const renderDataSetDisplay = () =>
+        render(html`<div>${activeDataset}</div>`, document.querySelector('#display'));
 
       info.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'info');
@@ -232,7 +240,6 @@
           });
         });
       };
-
       window.colorBy = colorBy;
 
       const switchTo = name => {
@@ -258,19 +265,31 @@
         });
 
         colorBy(colorProp);
+        renderDataSetDisplay();
       };
 
-      const controlsContainer = document.querySelector('#controls');
-      const controls = html`
-        <div>
-          <ul class="buttons">
-            ${dataSets.map(({ name }) =>
-              html`<li><button onclick=${() => switchTo(name)}>${name}</button></li>`
-            )}
-          </ul>
-        </div>
-      `;
-      render(controls, controlsContainer);
+      const handleRangeChange = ({ target: { value } }) =>
+        switchTo(dataSets[value].name);
+
+      const renderDataSetRange = () => {
+        const controls = html`
+          <div>
+            <input
+              type="range"
+              onChange=${handleRangeChange}
+              min="0"
+              max="${dataSets.length - 1}"
+              step="1"
+              defaultValue="${dataSets.length - 1}"
+            />
+          </div>
+        `;
+        render(controls, document.querySelector('#range'));
+      };
+
+      renderDataSetDisplay();
+
+      renderDataSetRange();
 
       switchTo(activeDataset);
     };
