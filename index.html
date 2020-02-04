@@ -53,16 +53,34 @@
     }
 
     tr.active {
-      color: green;
+      color: rgba(0, 100, 0, 1);
       background-color: #eee;
+    }
+
+    th {
+      width: 130px;
+    }
+
+    td {
+      width: 180px;
     }
 
     .key {
       cursor: pointer;
+      text-align: right;
     }
 
     .key:hover {
       background: rgba(255, 0, 255, 0.05);
+    }
+
+    .info {
+      font-size: 1em;
+      padding: .25em;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(180, 180, 180, .5);
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+      border-radius: 2px;
     }
   </style>
 </head>
@@ -77,10 +95,14 @@
 
     const main = async () => {
       const map = L.map('mapid', { preferCanvas: true });
-      const popup = L.popup();
+      const info = L.control();
+
       const markerStore = {};
+      const dataSets = [];
+      let activeDataset;
 
       let colorProp = 'statutFtth';
+      let currentData = null;
 
       const markerOptions = {
         radius: 4,
@@ -123,20 +145,37 @@
         fillOpacity: .01,
       }).addTo(map);
 
-      const rawData = await fetch('./db.json');
-      const data = await rawData.json();
+      const dbSource = await fetch('./db.json');
+      const dbItems = await dbSource.json();
 
-      const dataSets = [];
-      let activeDataset;
+      info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info');
+        this.update();
+        return this._div;
+      };
 
-      for (const { filename, date } of data) {
-        const rawDataSet = await fetch(`./${filename}`);
-        const dataSet = await rawDataSet.json();
-        dataSets.push({
-          data: dataSet,
-          name: date,
-        });
-        activeDataset = date;
+      info.update = function (data = {}) {
+        currentData = data;
+        this._div.innerHTML = `
+          <table>
+            ${Object.entries(data).map(([key, value]) => `
+              <tr data-key=${key} class=${colorProp === key ? 'active' : ''}>
+                <th class="key" onclick="colorBy('${key}')">${key}</th>
+                <td>${value}</td>
+              </tr>
+            `).sort().join`\n`}
+          </table>
+        `;
+      };
+
+      info.addTo(map);
+
+      for (const { filename, date: name } of dbItems) {
+        const dataSetSource = await fetch(`./${filename}`);
+        const dataSet = await dataSetSource.json();
+
+        dataSets.push({ data: dataSet, name });
+        activeDataset = name;
       }
 
       const colorFromStatutFtth = value => {
@@ -182,7 +221,10 @@
 
       const colorBy = prop => {
         colorProp = prop;
-        map.closePopup();
+
+        if (currentData) {
+          info.update(currentData);
+        }
 
         Object.values(markerStore).forEach(marker => {
           marker.setStyle({
@@ -195,6 +237,7 @@
 
       const switchTo = name => {
         activeDataset = name;
+
         const { data: dataSet } = dataSets.find(({ name: setName }) => (name === setName));
 
         for (const dossier in markerStore) {
@@ -207,29 +250,7 @@
 
           if (!marker) {
             marker = L.circleMarker([latitude, longitude], markerOptions).addTo(map);
-            marker.on('click', e => {
-              const data = Object.entries(dataSet.find(({ dossier: d }) => (dossier === d)));
-              popup.setContent(`
-                <table>
-                  ${data.map(([key, value]) => `
-                    <tr
-                      data-key=${key}
-                      class=${colorProp === key ? 'active' : ''}
-                    >
-                      <th
-                        class="key"
-                        onclick="colorBy('${key}')"
-                      >
-                        ${key}
-                      </th>
-                      <td>${value}</td>
-                    </tr>
-                  `).sort().join`\n`}
-                </table>
-              `);
-              popup.setLatLng(marker.getLatLng());
-              popup.openOn(map);
-            });
+            marker.on('click', ({ target: { data } }) => info.update(data));
             markerStore[dossier] = marker;
           }
 
