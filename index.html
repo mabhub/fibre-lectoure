@@ -56,6 +56,14 @@
       color: green;
       background-color: #eee;
     }
+
+    .key {
+      cursor: pointer;
+    }
+
+    .key:hover {
+      background: rgba(255, 0, 255, 0.05);
+    }
   </style>
 </head>
 <body>
@@ -68,10 +76,10 @@
     const md5 = new Hashes.MD5
 
     const main = async () => {
-      const map = L.map('mapid');
+      const map = L.map('mapid', { preferCanvas: true });
       const popup = L.popup();
-
       const markerStore = {};
+
       let colorProp = 'statutFtth';
 
       const markerOptions = {
@@ -93,7 +101,6 @@
       ]);
 
       L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png').addTo(map);
-      // L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
 
       L.polygon([
         [north, west],
@@ -174,6 +181,7 @@
       };
 
       const colorBy = prop => {
+        colorProp = prop;
         map.closePopup();
 
         Object.values(markerStore).forEach(marker => {
@@ -183,12 +191,9 @@
         });
       };
 
-      const setColorProp = prop => () => {
-        colorProp = prop;
-        colorBy(colorProp);
-      };
+      window.colorBy = colorBy;
 
-      const switchTo = name => () => {
+      const switchTo = name => {
         activeDataset = name;
         const { data: dataSet } = dataSets.find(({ name: setName }) => (name === setName));
 
@@ -211,7 +216,12 @@
                       data-key=${key}
                       class=${colorProp === key ? 'active' : ''}
                     >
-                      <th>${key}</th>
+                      <th
+                        class="key"
+                        onclick="colorBy('${key}')"
+                      >
+                        ${key}
+                      </th>
                       <td>${value}</td>
                     </tr>
                   `).sort().join`\n`}
@@ -234,30 +244,17 @@
         <div>
           <ul class="buttons">
             ${dataSets.map(({ name }) =>
-            html`<li><button onclick=${switchTo(name)}>${name}</button></li>`
+              html`<li><button onclick=${() => switchTo(name)}>${name}</button></li>`
             )}
-          </ul>
-          <ul class="buttons">
-            <li><button onclick=${setColorProp('statutFtth')}>statutFtth</button></li>
-            <li><button onclick=${setColorProp('idPm')}>idPm</button></li>
-            <li><button onclick=${setColorProp('voie')}>voie</button></li>
-            <li><button onclick=${setColorProp('libelleEtatPm')}>EtatPm</button></li>
-            <li><button onclick=${setColorProp('nbLogement')}>nbLogement</button></li>
-            <li><button onclick=${setColorProp('causeBlocage')}>causeBlocage</button></li>
-            <li><button onclick=${setColorProp('paReady')}>paReady</button></li>
           </ul>
         </div>
       `;
       render(controls, controlsContainer);
 
-      switchTo(activeDataset)();
+      switchTo(activeDataset);
     };
 
     main();
-  </script>
-
-  <script>
-
   </script>
 </body>
 </html>
