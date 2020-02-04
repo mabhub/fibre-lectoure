@@ -156,6 +156,8 @@
       const renderDataSetDisplay = () =>
         render(html`<div>${activeDataset}</div>`, document.querySelector('#display'));
 
+      render(html`<div>Loading…</div>`, document.querySelector('#display'));
+
       info.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'info');
         this.update();
@@ -179,6 +181,11 @@
       info.addTo(map);
 
       for (const { filename, date: name } of dbItems) {
+        render(
+          html`<div>Loading… <small>${dataSets.length + 1}/${dbItems.length}</small></div>`,
+          document.querySelector('#display'),
+        );
+
         const dataSetSource = await fetch(`./${filename}`);
         const dataSet = await dataSetSource.json();
 
