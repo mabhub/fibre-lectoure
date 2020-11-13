@@ -189,7 +189,7 @@
         const dataSetSource = await fetch(`./${filename}`);
         const dataSet = await dataSetSource.json();
 
-        dataSets.push({ data: dataSet, name });
+        dataSets.push({ data: Object.values(dataSet), name });
         activeDataset = name;
       }
 

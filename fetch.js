@@ -68,8 +68,11 @@ import crypto from 'crypto';
     filename,
   });
 
-  await fs.writeFile(filename, jsonString);
-  await fs.writeFile('last.json', jsonString);
+  const asObject = json.reduce((acc, curr) => ({ ...acc, [curr.dossier]: curr }), {})
+  const asObjectJson = JSON.stringify(asObject, null, 2);
+
+  await fs.writeFile(filename, asObjectJson);
+  await fs.writeFile('last.json', asObjectJson);
 
   // Update db file
   await fs.writeFile('db.json', JSON.stringify(db, null, 2));
