@@ -10,7 +10,9 @@
   "keywords": [],
   "author": "Benjamin <benjamin.marguin@makina-corpus.com>",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "jiff": "^0.7.3"
+  },
   "devDependencies": {
     "node-fetch": "^2.6.1"
   }

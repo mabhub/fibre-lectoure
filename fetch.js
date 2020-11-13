@@ -3,6 +3,7 @@
 import fetch from 'node-fetch';
 import fs from 'fs/promises';
 import crypto from 'crypto';
+import jiff from 'jiff';
 
 (async () => {
   const URL = 'https://eligibilite-thd.fr/eligibilite-thd/api/public/sites/rip/coords/GERS/';
@@ -61,6 +62,14 @@ import crypto from 'crypto';
   const dateTime = `${date}--${time}`;
   const filename = `${dateTime}.json`;
 
+  // Build previous snapshot from cumulative patches
+  let snapshot = {};
+  for await (const patchRef of db) {
+    const patch = JSON.parse(await fs.readFile(patchRef.filename));
+    snapshot = jiff.patch(patch, snapshot);
+  }
+
+  // Add new patch to database
   db.push({
     hash,
     date,
@@ -68,11 +77,15 @@ import crypto from 'crypto';
     filename,
   });
 
+  // Convert API output from array to object
   const asObject = json.reduce((acc, curr) => ({ ...acc, [curr.dossier]: curr }), {})
-  const asObjectJson = JSON.stringify(asObject, null, 2);
+  await fs.writeFile('last.json', JSON.stringify(asObject, null, 2));
 
-  await fs.writeFile(filename, asObjectJson);
-  await fs.writeFile('last.json', asObjectJson);
+  // Generate new patch
+  const patch = jiff.diff(snapshot, asObject);
+
+  // Write new patch to file
+  await fs.writeFile(filename, JSON.stringify(patch, null, 2));
 
   // Update db file
   await fs.writeFile('db.json', JSON.stringify(db, null, 2));
