@@ -1,0 +1,82 @@
+[
+  {
+    "op": "test",
+    "path": "/IMB~132208~1X~101KE/statutSyndic",
+    "value": "AC"
+  },
+  {
+    "op": "replace",
+    "path": "/IMB~132208~1X~101KE/statutSyndic",
+    "value": "EC"
+  },
+  {
+    "op": "test",
+    "path": "/IMB~132208~1X~10032/dateMescArcep",
+    "value": "2020-05-14T22:00:00.000+0000"
+  },
+  {
+    "op": "replace",
+    "path": "/IMB~132208~1X~10032/dateMescArcep",
+    "value": "2020-11-09T23:00:00.000+0000"
+  },
+  {
+    "op": "test",
+    "path": "/IMB~132208~1X~10060/causeBlocage",
+    "value": "Problème GC existant attente validation"
+  },
+  {
+    "op": "replace",
+    "path": "/IMB~132208~1X~10060/causeBlocage",
+    "value": ""
+  },
+  {
+    "op": "test",
+    "path": "/IMB~132208~1X~10060/statutFtth",
+    "value": "PDI"
+  },
+  {
+    "op": "replace",
+    "path": "/IMB~132208~1X~10060/statutFtth",
+    "value": "DIS"
+  },
+  {
+    "op": "test",
+    "path": "/IMB~132208~1X~10062/causeBlocage",
+    "value": "Problème GC existant attente validation"
+  },
+  {
+    "op": "replace",
+    "path": "/IMB~132208~1X~10062/causeBlocage",
+    "value": ""
+  },
+  {
+    "op": "test",
+    "path": "/IMB~132208~1X~10062/statutFtth",
+    "value": "PDI"
+  },
+  {
+    "op": "replace",
+    "path": "/IMB~132208~1X~10062/statutFtth",
+    "value": "DIS"
+  },
+  {
+    "op": "test",
+    "path": "/IMB~132208~1X~10063/causeBlocage",
+    "value": "Problème GC existant attente validation"
+  },
+  {
+    "op": "replace",
+    "path": "/IMB~132208~1X~10063/causeBlocage",
+    "value": ""
+  },
+  {
+    "op": "test",
+    "path": "/IMB~132208~1X~10063/statutFtth",
+    "value": "PDI"
+  },
+  {
+    "op": "replace",
+    "path": "/IMB~132208~1X~10063/statutFtth",
+    "value": "DIS"
+  }
+]
