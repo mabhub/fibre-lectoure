@@ -14,6 +14,7 @@
   crossorigin=""></script>
 
   <script src="https://unpkg.com/jshashes"></script>
+  <script src="https://unpkg.com/jsonpatch"></script>
 
   <style>
     html, body {
@@ -180,14 +181,18 @@
 
       info.addTo(map);
 
-      for (const { filename, date: name } of dbItems) {
+      let base = {};
+
+      for await (const { filename, date: name } of dbItems) {
         render(
           html`<div>Loading… <small>${dataSets.length + 1}/${dbItems.length}</small></div>`,
           document.querySelector('#display'),
         );
 
-        const dataSetSource = await fetch(`./${filename}`);
-        const dataSet = await dataSetSource.json();
+        const patchSource = await fetch(`./${filename}`);
+        const patch = await patchSource.json();
+        const dataSet = jsonpatch.apply_patch(base, patch);
+        base = dataSet;
 
         dataSets.push({ data: Object.values(dataSet), name });
         activeDataset = name;
