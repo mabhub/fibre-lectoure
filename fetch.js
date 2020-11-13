@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const fetch = require('node-fetch');
-const fs = require('fs').promises;
-const crypto = require('crypto');
+import fetch from 'node-fetch';
+import fs from 'fs/promises';
+import crypto from 'crypto';
 
 (async () => {
   const URL = 'https://eligibilite-thd.fr/eligibilite-thd/api/public/sites/rip/coords/GERS/';
